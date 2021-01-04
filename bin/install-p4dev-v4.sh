@@ -683,6 +683,40 @@ find /usr/lib /usr/local $HOME/.local | sort > usr-local-8-after-miscellaneous-i
 pip list  || echo "Some error occurred attempting to run command: pip"
 pip3 list
 
+# Things needed for P4-OvS
+echo "------------------------------------------------------------"
+echo "Start installing P4-OvS and its dependencies"
+set +x
+
+sudo apt-get install -y automake cmake libjudy-dev libgmp-dev libpcap-dev libboost-all-dev libevent-dev libtool flex bison pkg-config g++ libssl-dev libnanomsg-dev libjudy-dev libreadline-dev valgrind libtool-bin libboost-dev libboost-system-dev libboost-thread-dev
+
+sudo apt-get install -y python3-pip python3-dev
+sudo pip3 install nnpy
+sudo pip3 install pyroute2 ply==3.8 scapy==2.4.0
+
+echo "Install Thrift v0.13"
+cd "${INSTALL_DIR}"
+git clone https://github.com/apache/thrift
+cd thrift
+git checkout v0.13.0
+./bootstrap.sh
+./configure --prefix=/usr
+make
+sudo make install
+
+echo "Install P4-OvS using a special fork"
+cd "${INSTALL_DIR}"
+git clone https://github.com/simula/P4-OvS
+cd P4-OvS
+git remote add upstream https://github.com/osinstom/P4-OvS.git
+git checkout dreibh/build-fix-16Dec2020
+./boot.sh
+./configure
+make
+sudo make install
+
+set -x
+
 set +e
 
 set +x
@@ -748,4 +782,4 @@ echo "CONSIDER READING WHAT IS ABOVE"
 echo "----------------------------------------------------------------------"
 set -x
 
-# clean_up
+clean_up
