@@ -512,6 +512,7 @@ set -x
 date
 
 # Deps needed to build PI:
+sudo apt-get --yes install libjudy-dev libgmp-dev libpcap-dev libboost-all-dev libevent-dev libtool flex bison pkg-config g++ libssl-dev libnanomsg-dev libjudy-dev libreadline-dev valgrind libtool-bin libboost-dev libboost-system-dev libboost-thread-dev
 sudo apt-get --yes install libnanomsg-dev libprotobuf-dev protobuf-compiler protobuf-compiler-grpc libgrpc++-dev libgrpc-dev libgc-dev
 
 git clone https://github.com/osinstom/PI   # *NOT* upstream: https://github.com/p4lang/PI
