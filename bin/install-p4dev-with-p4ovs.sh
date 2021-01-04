@@ -506,33 +506,23 @@ find /usr/lib /usr/local $HOME/.local | sort > usr-local-3-after-grpc.txt
 
 set +x
 echo "------------------------------------------------------------"
-echo "Installing p4lang/PI, needed for installing p4lang/behavioral-model simple_switch_grpc"
+echo "Installing osinstom/PI (fork of p4lang/PI), needed for installing p4lang/behavioral-model simple_switch_grpc"
 echo "start install PI:"
 set -x
 date
 
 # Deps needed to build PI:
-sudo apt-get --yes install libjudy-dev libreadline-dev valgrind libtool-bin libboost-dev libboost-system-dev libboost-thread-dev
+sudo apt-get --yes install libjudy-dev libgmp-dev libpcap-dev libboost-all-dev libevent-dev libtool flex bison pkg-config g++ libssl-dev libnanomsg-dev libjudy-dev libreadline-dev valgrind libtool-bin libboost-dev libboost-system-dev libboost-thread-dev
+sudo apt-get --yes install libnanomsg-dev libprotobuf-dev protobuf-compiler protobuf-compiler-grpc libgrpc++-dev libgrpc-dev libgc-dev
 
-git clone https://github.com/p4lang/PI
+git clone https://github.com/osinstom/PI   # *NOT* upstream: https://github.com/p4lang/PI
 cd PI
-git submodule update --init --recursive
-git log -n 1
+git checkout p4-ovs
+git submodule update --init
 ./autogen.sh
-./configure --with-proto --without-internal-rpc --without-cli --without-bmv2
-# Output I saw:
-#Features recap ......................................
-#Use sysrepo gNMI implementation .............. : no
-#Compile demo_grpc ............................ : no
-#
-#Features recap ......................................
-#Compile for bmv2 ............................. : no
-#Compile C++ frontend ......................... : yes
-#Compile p4runtime.proto and associated fe .... : yes
-#Compile internal RPC ......................... : no
-#Compile PI C CLI ............................. : no
+./configure --prefix=/usr --with-proto --with-fe-cpp --with-cli --with-internal-rpc --with-gnu-ld
 make
-sudo make install
+make install
 
 # Save about 0.25G of storage by cleaning up PI build
 make clean
@@ -692,6 +682,40 @@ find /usr/lib /usr/local $HOME/.local | sort > usr-local-8-after-miscellaneous-i
 
 pip list  || echo "Some error occurred attempting to run command: pip"
 pip3 list
+
+# Things needed for P4-OvS
+echo "------------------------------------------------------------"
+echo "Start installing P4-OvS and its dependencies"
+set +x
+
+sudo apt-get install -y automake cmake libjudy-dev libgmp-dev libpcap-dev libboost-all-dev libevent-dev libtool flex bison pkg-config g++ libssl-dev libnanomsg-dev libjudy-dev libreadline-dev valgrind libtool-bin libboost-dev libboost-system-dev libboost-thread-dev
+
+sudo apt-get install -y python3-pip python3-dev
+sudo pip3 install nnpy
+sudo pip3 install pyroute2 ply==3.8 scapy==2.4.0
+
+echo "Install Thrift v0.13"
+cd "${INSTALL_DIR}"
+git clone https://github.com/apache/thrift
+cd thrift
+git checkout v0.13.0
+./bootstrap.sh
+./configure --prefix=/usr
+make
+sudo make install
+
+echo "Install P4-OvS using a special fork"
+cd "${INSTALL_DIR}"
+git clone https://github.com/simula/P4-OvS
+cd P4-OvS
+git remote add upstream https://github.com/osinstom/P4-OvS.git
+git checkout dreibh/build-fix-16Dec2020
+./boot.sh
+./configure
+make
+sudo make install
+
+set -x
 
 set +e
 
