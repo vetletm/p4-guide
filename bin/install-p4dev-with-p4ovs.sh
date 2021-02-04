@@ -522,7 +522,7 @@ git submodule update --init
 ./autogen.sh
 ./configure --prefix=/usr --with-proto --with-fe-cpp --with-cli --with-internal-rpc --with-gnu-ld
 make
-make install
+sudo make install
 
 # Save about 0.25G of storage by cleaning up PI build
 make clean
